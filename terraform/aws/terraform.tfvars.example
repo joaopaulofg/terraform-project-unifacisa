@@ -1,5 +1,5 @@
 key_name       = "terraform-key"
-repository_url = "https://github.com/seu-usuario/seu-repositorio.git"
+repository_url = "https://github.com/joaopaulofg/terraform-project-unifacisa.git"
 
 # Recomendado: substitua pelo seu IP publico com /32.
 ssh_allowed_cidr_blocks = ["0.0.0.0/0"]
