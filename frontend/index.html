@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Library - Books & Movies</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .item-card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            background-color: #fafafa;
+        }
+        .rating {
+            color: #ffc107;
+        }
+        .comments {
+            margin-top: 10px;
+        }
+        .comment {
+            background-color: #eee;
+            padding: 8px;
+            border-radius: 4px;
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Personal Library - Books & Movies</h1>
+        
+        <!-- Form to add new item -->
+        <h2>Add New Item</h2>
+        <form id="itemForm">
+            <div class="form-group">
+                <label for="title">Title:</label>
+                <input type="text" id="title" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="type">Type:</label>
+                <select id="type" required>
+                    <option value="book">Book</option>
+                    <option value="movie">Movie</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="description">Description:</label>
+                <textarea id="description" rows="3"></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="rating">Rating (0-10):</label>
+                <input type="number" id="rating" min="0" max="10">
+            </div>
+            
+            <button type="submit">Add Item</button>
+        </form>
+        
+        <!-- Items list -->
+        <h2>My Library</h2>
+        <div id="itemsContainer"></div>
+    </div>
+
+    <script>
+        // Base URL for the API
+        const API_BASE = `${window.location.origin}/api`;
+        
+        // Load items when page loads
+        document.addEventListener('DOMContentLoaded', loadItems);
+        
+        // Handle form submission
+        document.getElementById('itemForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const itemData = {
+                title: document.getElementById('title').value,
+                type: document.getElementById('type').value,
+                description: document.getElementById('description').value,
+                rating: parseFloat(document.getElementById('rating').value) || 0
+            };
+            
+            try {
+                const response = await fetch(`${API_BASE}/items`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(itemData)
+                });
+                
+                if (response.ok) {
+                    document.getElementById('itemForm').reset();
+                    loadItems(); // Refresh the list
+                } else {
+                    const error = await response.json();
+                    alert('Error adding item: ' + error.message);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error connecting to server');
+            }
+        });
+        
+        // Load and display items
+        async function loadItems() {
+            try {
+                const response = await fetch(`${API_BASE}/items`);
+                const items = await response.json();
+                displayItems(items);
+            } catch (error) {
+                console.error('Error loading items:', error);
+            }
+        }
+        
+        // Display items in the UI
+        function displayItems(items) {
+            const container = document.getElementById('itemsContainer');
+            
+            if (items.length === 0) {
+                container.innerHTML = '<p>No items in your library yet.</p>';
+                return;
+            }
+            
+            container.innerHTML = items.map(item => `
+                <div class="item-card" data-id="${item._id}">
+                    <h3>${item.title} (${item.type})</h3>
+                    <p><strong>Description:</strong> ${item.description || 'No description'}</p>
+                    <p><strong>Rating:</strong> <span class="rating">${item.rating}/10</span></p>
+                    <p><strong>Added:</strong> ${new Date(item.createdAt).toLocaleDateString()}</p>
+                    
+                    <div class="comments">
+                        <h4>Comments (${item.comments.length})</h4>
+                        ${item.comments.length > 0 ? 
+                            item.comments.map(comment => `
+                                <div class="comment" data-comment-id="${comment._id}">
+                                    <p>${comment.text}</p>
+                                    <button onclick="editComment('${item._id}', '${comment._id}', '${comment.text}')">Edit</button>
+                                    <button onclick="deleteComment('${item._id}', '${comment._id}')">Delete</button>
+                                </div>
+                            `).join('') : 
+                            '<p>No comments yet.</p>'
+                        }
+                        <div class="add-comment">
+                            <textarea id="comment-text-${item._id}" placeholder="Add a comment..."></textarea>
+                            <button onclick="addComment('${item._id}')">Add Comment</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        // Add comment to item
+        async function addComment(itemId) {
+            const text = document.getElementById(`comment-text-${itemId}`).value;
+            if (!text.trim()) return;
+            
+            try {
+                const response = await fetch(`${API_BASE}/items/${itemId}/comments`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ text })
+                });
+                
+                if (response.ok) {
+                    document.getElementById(`comment-text-${itemId}`).value = '';
+                    loadItems(); // Refresh the list
+                } else {
+                    const error = await response.json();
+                    alert('Error adding comment: ' + error.message);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error connecting to server');
+            }
+        }
+        
+        // Edit comment
+        async function editComment(itemId, commentId, currentText) {
+            const newText = prompt('Edit your comment:', currentText);
+            if (newText === null || !newText.trim()) return;
+            
+            try {
+                const response = await fetch(`${API_BASE}/items/${itemId}/comments/${commentId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ text: newText })
+                });
+                
+                if (response.ok) {
+                    loadItems(); // Refresh the list
+                } else {
+                    const error = await response.json();
+                    alert('Error editing comment: ' + error.message);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error connecting to server');
+            }
+        }
+        
+        // Delete comment
+        async function deleteComment(itemId, commentId) {
+            if (!confirm('Are you sure you want to delete this comment?')) return;
+            
+            try {
+                const response = await fetch(`${API_BASE}/items/${itemId}/comments/${commentId}`, {
+                    method: 'DELETE'
+                });
+                
+                if (response.ok) {
+                    loadItems(); // Refresh the list
+                } else {
+                    const error = await response.json();
+                    alert('Error deleting comment: ' + error.message);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error connecting to server');
+            }
+        }
+    </script>
+</body>
+</html>
