@@ -1,56 +1,76 @@
-# Personal Library - Books & Movies
+# Biblioteca Pessoal - Livros e Filmes
 
-Simple personal library application to manage your books and movies collection with ratings and comments.
+Aplicacao simples para cadastrar livros e filmes, adicionar notas e registrar comentarios.
 
-## Final Delivery
+## Entrega Final
 
-- Repository: <https://github.com/joaopaulofg/terraform-project-unifacisa>
-- Presentation video: <https://drive.google.com/file/d/1-w0bc1IsnZOG2uBypkYNU_-GnkO3403h/view?usp=sharing>
+- Repositorio: <https://github.com/joaopaulofg/terraform-project-unifacisa>
+- Video de apresentacao: <https://drive.google.com/file/d/1-w0bc1IsnZOG2uBypkYNU_-GnkO3403h/view?usp=sharing>
+- Evidencias: a pasta [`screenshots`](screenshots) contem prints do processo de deploy e validacao na AWS.
 
-## Features
+## Funcionalidades
 
-- Add books or movies to your collection
-- Rate items from 0 to 10
-- Add comments to items
-- View all items in your library
-- Simple CRUD operations
+- Cadastro de livros ou filmes.
+- Avaliacao de itens com nota de 0 a 10.
+- Cadastro, edicao e remocao de comentarios.
+- Listagem dos itens cadastrados.
+- API simples com operacoes CRUD.
 
-## Architecture
+## Arquitetura
 
-```
+```text
 book-movie-library/
-├── backend/           # Node.js/Express API and static frontend server
-├── frontend/          # Simple HTML/CSS/JS interface
-├── docker-compose.yml # App + MongoDB containers
-└── terraform/aws/     # AWS infrastructure with Terraform
+├── backend/           # API Node.js/Express e servidor do frontend estatico
+├── frontend/          # Interface simples em HTML, CSS e JavaScript
+├── screenshots/       # Prints do processo de deploy e validacao
+├── docker-compose.yml # Containers da aplicacao e do MongoDB
+└── terraform/aws/     # Infraestrutura AWS com Terraform
 ```
 
-## Getting Started
+## Tecnologias Utilizadas
 
-### Prerequisites
+- Backend: Node.js, Express e Mongoose.
+- Frontend: HTML, CSS e JavaScript.
+- Banco de dados: MongoDB em container Docker.
+- Containerizacao: Docker e Docker Compose.
+- Infraestrutura: Terraform na AWS com EC2.
 
-- Docker and Docker Compose installed
+## Execucao Local
 
-### Installation
+### Pre-requisitos
 
-1. Clone this repository
-2. Navigate to project directory
-3. Run: `docker-compose up --build`
+- Docker instalado.
+- Docker Compose instalado.
 
-### Usage
+### Passos
 
-1. Access the application at `http://localhost:3000`
-2. Add books or movies using the form
-3. Rate items and add comments
-4. View all items in your library
+```bash
+docker compose up --build
+```
 
-## AWS Deployment
+Depois acesse:
 
-The Terraform files in `terraform/aws` create a VPC, public subnets, security group and an EC2 instance that installs Docker, clones this repository and starts the app with Docker Compose.
+```text
+http://localhost:3000
+```
 
-See [`terraform/aws/README.md`](terraform/aws/README.md) for the deployment steps.
+## Deploy na AWS
 
-### Quick AWS Steps
+Os arquivos Terraform em [`terraform/aws`](terraform/aws) criam:
+
+- VPC propria.
+- 2 subnets publicas.
+- Internet Gateway.
+- Tabela de rotas publica.
+- Security Group liberando SSH na porta `22` e a aplicacao na porta `3000`.
+- Instancia EC2 Ubuntu.
+- Instalacao automatica do Docker e Docker Compose.
+- Clone deste repositorio na EC2.
+- Execucao da aplicacao com `docker compose up -d --build`.
+
+Veja tambem o guia especifico em [`terraform/aws/README.md`](terraform/aws/README.md).
+
+### Passos Rapidos
 
 ```bash
 cd terraform/aws
@@ -63,50 +83,47 @@ terraform apply
 terraform output
 ```
 
-The main output is `application_url`, which opens the deployed app in the browser.
+O principal output e `application_url`, usado para abrir a aplicacao no navegador.
 
-### Evidence Checklist
+## Evidencias Recomendadas
 
-Recommended screenshots for the final submission:
+Para a entrega final, os prints recomendados sao:
 
-- GitHub repository with application code, Terraform code and README.
-- Terminal showing `terraform apply` completed successfully.
-- Terminal showing `terraform output` with `application_url`.
-- EC2 instance running in the AWS Console.
-- Security Group inbound rules showing ports `22` and `3000`.
-- Application opened in the browser through the EC2 public IP.
-- A book or movie registered and displayed in the app.
-- SSH terminal showing `sudo docker compose ps` with `backend` and `mongodb` running.
+- Repositorio GitHub com codigo da aplicacao, codigo Terraform e README.
+- Terminal mostrando `terraform init`.
+- Terminal mostrando `terraform plan`.
+- Terminal mostrando `terraform apply` concluido com sucesso.
+- Terminal mostrando `terraform output` com `application_url`.
+- Instancia EC2 em execucao no Console AWS.
+- Configuracao da EC2 no Console AWS.
+- Aplicacao aberta no navegador pelo IP publico da EC2.
+- Item cadastrado e exibido na aplicacao.
+- Terminal SSH mostrando `sudo docker compose ps` com `backend` e `mongodb` em execucao.
 
-### Avoiding AWS Charges
+Essas evidencias estao organizadas na pasta [`screenshots`](screenshots).
 
-After collecting the evidence, destroy the infrastructure:
+## Evitando Cobrancas na AWS
+
+Depois de coletar as evidencias, destrua a infraestrutura:
 
 ```bash
 cd terraform/aws
 terraform destroy
 ```
 
-This removes the EC2 instance and the network resources created by this project.
+Esse comando remove a EC2 e os recursos de rede criados por este projeto.
 
-## API Endpoints
+## Endpoints da API
 
-- `GET /api/items` - Get all items
-- `GET /api/items/:id` - Get specific item
-- `POST /api/items` - Create new item
-- `PUT /api/items/:id` - Update item
-- `DELETE /api/items/:id` - Delete item
-- `POST /api/items/:id/comments` - Add comment to item
+- `GET /api/items` - Lista todos os itens.
+- `GET /api/items/:id` - Busca um item especifico.
+- `POST /api/items` - Cria um novo item.
+- `PUT /api/items/:id` - Atualiza um item.
+- `DELETE /api/items/:id` - Remove um item.
+- `POST /api/items/:id/comments` - Adiciona comentario a um item.
+- `PUT /api/items/:id/comments/:commentId` - Atualiza um comentario.
+- `DELETE /api/items/:id/comments/:commentId` - Remove um comentario.
 
-## Database
+## Banco de Dados
 
-- MongoDB (via Docker)
-- Items stored with title, type (book/movie), description, rating, and comments
-
-## Technologies Used
-
-- Backend: Node.js, Express, Mongoose
-- Frontend: HTML, CSS, JavaScript
-- Database: MongoDB
-- Containerization: Docker
-- Infrastructure: Terraform on AWS EC2
+O MongoDB roda em container Docker junto com a aplicacao. No deploy da AWS, o banco nao fica exposto diretamente para a internet; apenas o backend acessa o MongoDB pela rede interna do Docker Compose.
