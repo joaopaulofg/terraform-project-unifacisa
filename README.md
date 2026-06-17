@@ -68,8 +68,6 @@ Os arquivos Terraform em [`terraform/aws`](terraform/aws) criam:
 - Clone deste repositorio na EC2.
 - Execucao da aplicacao com `docker compose up -d --build`.
 
-Veja tambem o guia especifico em [`terraform/aws/README.md`](terraform/aws/README.md).
-
 ### Passos Rapidos
 
 ```bash
@@ -82,36 +80,6 @@ terraform plan
 terraform apply
 terraform output
 ```
-
-O principal output e `application_url`, usado para abrir a aplicacao no navegador.
-
-## Evidencias Recomendadas
-
-Para a entrega final, os prints recomendados sao:
-
-- Repositorio GitHub com codigo da aplicacao, codigo Terraform e README.
-- Terminal mostrando `terraform init`.
-- Terminal mostrando `terraform plan`.
-- Terminal mostrando `terraform apply` concluido com sucesso.
-- Terminal mostrando `terraform output` com `application_url`.
-- Instancia EC2 em execucao no Console AWS.
-- Configuracao da EC2 no Console AWS.
-- Aplicacao aberta no navegador pelo IP publico da EC2.
-- Item cadastrado e exibido na aplicacao.
-- Terminal SSH mostrando `sudo docker compose ps` com `backend` e `mongodb` em execucao.
-
-Essas evidencias estao organizadas na pasta [`screenshots`](screenshots).
-
-## Evitando Cobrancas na AWS
-
-Depois de coletar as evidencias, destrua a infraestrutura:
-
-```bash
-cd terraform/aws
-terraform destroy
-```
-
-Esse comando remove a EC2 e os recursos de rede criados por este projeto.
 
 ## Endpoints da API
 
